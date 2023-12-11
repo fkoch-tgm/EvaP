@@ -728,8 +728,12 @@ class Evaluation(LoggedModel):
         ],
         target=State.NEW,
     )
-    def revert_to_new(self):
-        pass
+    def reset_to_new(self, delete_previous_answers: bool = False):
+        """ Reset an Evaluation after it started (#1991) """
+        if delete_previous_answers:
+            for answer_class in Answer.__subclasses__():
+                answer_class.objects.filter(contribution__evaluation_id=self.id).delete()
+            self.voters.clear()
 
     @transition(
         field=state,

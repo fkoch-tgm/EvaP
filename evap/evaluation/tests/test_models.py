@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase, override_settings
 from django_webtest import WebTest
 from model_bakery import baker
+from django.conf import settings
 
 from evap.evaluation.models import (
     Contribution,
@@ -22,7 +23,7 @@ from evap.evaluation.models import (
     RatingAnswerCounter,
     Semester,
     TextAnswer,
-    UserProfile,
+    UserProfile, Answer,
 )
 from evap.evaluation.tests.tools import (
     let_user_vote_for_evaluation,
@@ -1103,3 +1104,47 @@ class QuestionnaireTests(TestCase):
     def test_locked_contributor_questionnaire(self):
         questionnaire = baker.prepare(Questionnaire, is_locked=True, type=Questionnaire.Type.CONTRIBUTOR)
         self.assertRaises(ValidationError, questionnaire.clean)
+
+
+class TestResetEvaluation(TestCase):
+    """Tests Evaluation.reset_to_new()"""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        assert (set(Answer.__subclasses__()) == {TextAnswer, RatingAnswerCounter}), \
+            "Test assumes the only answers are TextAnswer and RatingAnswerCounter"
+
+    @classmethod
+    def setUpTestData(cls):
+        initial_state = Evaluation.State.IN_EVALUATION
+        cls.voters = baker.make(UserProfile, _quantity=3)
+        cls.evaluation = baker.make(Evaluation, state=initial_state, voters=cls.voters, make_m2m=True)
+
+        cls.text_answers = baker.make(TextAnswer, _quantity=10, contribution__evaluation=cls.evaluation)
+        cls.rating_answers = baker.make(RatingAnswerCounter, _quantity=10, contribution__evaluation=cls.evaluation)
+
+        cls.additional_text_answers = baker.make(TextAnswer, _quantity=10)
+        cls.additional_rating_answers = baker.make(RatingAnswerCounter, _quantity=10)
+
+    def test_reset_when_checked(self):
+        # if checked, all received answers will be deleted & voters will be cleared
+        self.evaluation.reset_to_new(delete_previous_answers=True)
+
+        self.assertEqual(self.evaluation.state, Evaluation.State.NEW)
+
+        self.assertEqual(self.evaluation.voters.count(), 0)
+        self.assertTrue(UserProfile.objects.count() > 0)
+
+        self.assertCountEqual(TextAnswer.objects.all(), self.additional_text_answers)
+        self.assertCountEqual(RatingAnswerCounter.objects.all(), self.additional_rating_answers)
+
+    def test_reset_when_not_checked(self):
+        # if not checked, all received answers will be preserved
+        self.evaluation.reset_to_new(delete_previous_answers=False)
+
+        self.assertEqual(self.evaluation.state, Evaluation.State.NEW)
+        self.assertCountEqual(self.evaluation.voters.all(), self.voters)
+
+        self.assertCountEqual(TextAnswer.objects.all(), self.text_answers + self.additional_text_answers)
+        self.assertCountEqual(RatingAnswerCounter.objects.all(), self.rating_answers + self.additional_rating_answers)
