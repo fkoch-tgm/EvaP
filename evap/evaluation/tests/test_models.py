@@ -11,6 +11,7 @@ from django_webtest import WebTest
 from model_bakery import baker
 
 from evap.evaluation.models import (
+    Answer,
     Contribution,
     Course,
     CourseType,
@@ -23,7 +24,7 @@ from evap.evaluation.models import (
     RatingAnswerCounter,
     Semester,
     TextAnswer,
-    UserProfile, Answer,
+    UserProfile,
 )
 from evap.evaluation.tests.tools import (
     let_user_vote_for_evaluation,
