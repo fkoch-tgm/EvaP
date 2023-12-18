@@ -1445,7 +1445,7 @@ class TestEvaluationOperationView(WebTestStaffMode):
         page = self.app.get(f"/staff/semester/{self.semester.pk}", user=self.manager)
         form = page.forms["evaluation_operation_form"]
         form["evaluation"] = evaluation.pk
-        response = form.submit("target_state", value=str(Evaluation.State.PUBLISHED))
+        response = form.submit("target_state", value=str(Evaluation.State.PUBLISHED.value))
 
         form = response.forms["evaluation-operation-form"]
         form["send_email_contributor"] = contributors
@@ -1502,7 +1502,7 @@ class TestEvaluationOperationView(WebTestStaffMode):
         form = page.forms["evaluation_operation_form"]
         self.assertEqual(evaluation.state, old_state)
         form["evaluation"] = evaluation.pk
-        response = form.submit("target_state", value=str(new_state))
+        response = form.submit("target_state", value=str(new_state.value))
 
         form = response.forms["evaluation-operation-form"]
         response = form.submit().follow()
