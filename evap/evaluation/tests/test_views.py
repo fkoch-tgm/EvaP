@@ -7,11 +7,12 @@ from django.utils import translation
 from django_webtest import WebTest
 from model_bakery import baker
 
-from evap.evaluation.models import Evaluation, Question, QuestionType, UserProfile, Semester
+from evap.evaluation.models import Evaluation, Question, QuestionType, Semester, UserProfile
 from evap.evaluation.tests.tools import (
     WebTestWith200Check,
     create_evaluation_with_responsible_and_editor,
-    store_ts_test_asset, make_manager,
+    make_manager,
+    store_ts_test_asset,
 )
 from evap.staff.tests.utils import WebTestStaffMode
 
@@ -250,7 +251,6 @@ class TestNotebookView(WebTest):
 
 
 class TestResetEvaluation(WebTestStaffMode):
-
     @classmethod
     def setUpTestData(cls):
         cls.manager = make_manager()
