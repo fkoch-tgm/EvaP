@@ -256,41 +256,32 @@ class TestResetEvaluation(WebTestStaffMode):
         cls.manager = make_manager()
         cls.semester = baker.make(Semester, results_are_archived=True)
 
-    def reset_from_x_to_new(self, x: Evaluation.State, assertion):
-        evaluation = baker.make(Evaluation, state=x, course__semester=self.semester)
+    def test_reset_from_to_new(self):
+        states = list(Evaluation.State)
+        states.remove(Evaluation.State.NEW)
+        states.remove(Evaluation.State.PUBLISHED)
 
-        semester_overview_page = self.app.get(f"/staff/semester/{self.semester.pk}", user=self.manager, status=200)
+        for state in states:
+            evaluation = baker.make(Evaluation, state=state, course__semester=self.semester)
 
-        form = semester_overview_page.forms["evaluation_operation_form"]
+            semester_overview_page = self.app.get(f"/staff/semester/{self.semester.pk}", user=self.manager, status=200)
 
-        form["evaluation"] = [evaluation.pk]
+            form = semester_overview_page.forms["evaluation_operation_form"]
 
-        confirmation_page = form.submit("target_state", value=str(Evaluation.State.NEW.value))
+            form["evaluation"] = [evaluation.pk]
 
-        # TODO: overthink this
-        try:
-            confirmation_form = confirmation_page.forms["evaluation-operation-form"]
+            confirmation_page = form.submit("target_state", value=str(Evaluation.State.NEW.value))
+
+            # TODO: overthink this
+            try:
+                confirmation_form = confirmation_page.forms["evaluation-operation-form"]
+            except KeyError:
+                self.assertTrue(False, "WARNING! no confirmation modal was shown!")
+                return
+
+            self.assertIn("delete-previous-answers", confirmation_form.fields)
+
             confirmation_form.submit()
-        except KeyError:
-            print("WARNING! no confirmation modal was shown!")
 
-        evaluation = Evaluation.objects.filter(pk=evaluation.pk).first()  # is this needed?
-
-        assertion(evaluation)
-
-    def test_reset_to_new(self):
-        invalid_start_states = [Evaluation.State.NEW, Evaluation.State.PUBLISHED]
-
-        valid_start_states = [
-            Evaluation.State.PREPARED,
-            Evaluation.State.EDITOR_APPROVED,
-            Evaluation.State.APPROVED,
-            Evaluation.State.IN_EVALUATION,
-            Evaluation.State.EVALUATED,
-            Evaluation.State.REVIEWED
-        ]
-
-        for s in valid_start_states:
-            self.reset_from_x_to_new(s, lambda evaluation: self.assertEqual(evaluation.state, Evaluation.State.NEW,
-                                                                            f"evaluation state was not reset to NEW from {s}"))
-
+            evaluation = Evaluation.objects.get(pk=evaluation.pk)  # re-get evaluation
+            self.assertEqual(evaluation.state, Evaluation.State.NEW, "Did not reset the evaluation")
