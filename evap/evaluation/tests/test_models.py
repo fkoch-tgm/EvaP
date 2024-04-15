@@ -7,6 +7,7 @@ from django.core import mail
 from django.core.cache import caches
 from django.core.exceptions import ValidationError
 from django.test import TestCase, override_settings
+from django_fsm import TransitionNotAllowed
 from django_webtest import WebTest
 from model_bakery import baker
 
@@ -1175,5 +1176,5 @@ class TestResetEvaluationValidSourceStates(TestCase):
     def test_invalid_source_states(self):
         for s in self.invalid_source_states:
             evaluation = baker.make(Evaluation, state=s)
-            with self.assertRaises(Exception, msg=f"Could wrongly reset evaluation from source state {s}"):
+            with self.assertRaises(TransitionNotAllowed, msg=f"Could wrongly reset evaluation from source state {s}"):
                 evaluation.reset_to_new()

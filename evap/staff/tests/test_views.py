@@ -2229,6 +2229,8 @@ class TestEvaluationEditView(WebTestStaffMode):
             '<label class="form-check-label badge bg-danger" for="id_contributions-1-questionnaires_0">', page
         )
 
+    # TODO@Felix: it seems like this does not patch the dict in time, but it seems to work with the live system
+    #             figure out a way to directly mock the translation db?
     @patch.dict(Evaluation.STATE_STR_CONVERSION, {Evaluation.State.PREPARED: "mock-translated-prepared"})
     def test_state_change_log_translated(self):
         page = self.app.get(self.url, user=self.manager)

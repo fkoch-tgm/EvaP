@@ -49,6 +49,7 @@ class LogJSONEncoder(JSONEncoder):
         return super().default(o)
 
 
+# TODO@Felix: does this even make sense, if choices is saved in the database?
 def _choice_to_display(field, choice):  # does not support nested choices
     for key, label in field.choices:
         if key == choice:

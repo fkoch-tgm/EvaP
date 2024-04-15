@@ -393,9 +393,27 @@ class Evaluation(LoggedModel):
         REVIEWED = 70
         PUBLISHED = 80
 
-    # TODO: specifying choices like this creates logging errors
-    # state = FSMIntegerField(default=State.NEW, choices=[(s, s.name) for s in State], protected=True)
-    state = FSMIntegerField(default=State.NEW, protected=True, verbose_name=_("state"))
+    STATE_STR_CONVERSION = {
+        State.NEW: _("new"),
+        State.PREPARED: _("prepared"),
+        State.EDITOR_APPROVED: _("editor_approved"),
+        State.APPROVED: _("approved"),
+        State.IN_EVALUATION: _("in_evaluation"),
+        State.EVALUATED: _("evaluated"),
+        State.REVIEWED: _("reviewed"),
+        State.PUBLISHED: _("published"),
+    }
+
+    # TODO@Felix: test that choices contains all States
+    state = FSMIntegerField(
+        default=State.NEW, choices=STATE_STR_CONVERSION.items(), protected=True,
+        verbose_name=_("state")
+    )
+
+    # state = FSMIntegerField(
+    #     default=State.NEW, choices=[(s, "STATE_STR_CONVERSION[s]") for s in State], protected=True,
+    #     verbose_name=_("state")
+    # )
 
     course = models.ForeignKey(Course, models.PROTECT, verbose_name=_("course"), related_name="evaluations")
 
@@ -806,19 +824,8 @@ class Evaluation(LoggedModel):
         self._voter_count = None
         self._participant_count = None
 
-    STATE_STR_CONVERSION = {
-        State.NEW: _("new"),
-        State.PREPARED: _("prepared"),
-        State.EDITOR_APPROVED: _("editor_approved"),
-        State.APPROVED: _("approved"),
-        State.IN_EVALUATION: _("in_evaluation"),
-        State.EVALUATED: _("evaluated"),
-        State.REVIEWED: _("reviewed"),
-        State.PUBLISHED: _("published"),
-    }
-
     @classmethod
-    def state_to_str(cls, state):
+    def state_to_str(cls, state: "Evaluation.State | int") -> StrOrPromise:
         return cls.STATE_STR_CONVERSION[state]
 
     @property
@@ -1030,10 +1037,13 @@ class Evaluation(LoggedModel):
 
     @classmethod
     def transform_log_action(cls, field_action):
-        if field_action.label.lower() == Evaluation.state.field.verbose_name.lower():
-            return FieldAction(
-                field_action.label, field_action.type, [cls.state_to_str(state) for state in field_action.items]
-            )
+        # if field_action.label.lower() == Evaluation.state.field.verbose_name.lower():
+        #     # TODO@Felix: fails, because field_action.items[0] is a string and not a real state enum / int
+        #     #             is it necessary to event transform this string into a string representation?
+        #     return FieldAction(
+        #         # field_action.label, field_action.type, [cls.state_to_str(state) for state in field_action.items]
+        #         field_action.label, field_action.type, [state for state in field_action.items]
+        #     )
         return field_action
 
 
