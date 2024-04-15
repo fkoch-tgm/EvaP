@@ -251,8 +251,6 @@ class TestNotebookView(WebTest):
 
 
 class ResetToNewFormTest(WebTestStaffMode):
-    # TODO@Felix: check if button is checked by default
-    # self.assertInHTML('<input class="form-check-input" type="checkbox" name="delete-previous-answers" id="delete-previous-answers" checked>', str( semester_overview_page.html))
 
     @classmethod
     def setUpTestData(cls):
@@ -294,6 +292,8 @@ class ResetToNewFormTest(WebTestStaffMode):
 
         confirmation_form.submit()
 
+        # TODO@Felix: (needs selenium webtests) test if confirmation popup is not shown
+
         evaluation = Evaluation.objects.get(pk=self.evaluation.pk)  # re-get evaluation
         self.assertEqual(
             evaluation.voters.count(),
@@ -311,8 +311,7 @@ class ResetToNewFormTest(WebTestStaffMode):
     def test_delete_previous_answers(self):
         self._open_confirmation_form().submit()
 
-        # TODO@Felix: show confirmation popup
-        # TODO@Felix: check if confirmation popup is shown
+        # TODO@Felix: (needs selenium webtests) test if confirmation popup is shown
 
         evaluation = Evaluation.objects.get(pk=self.evaluation.pk)  # re-get evaluation
         self.assertEqual(
