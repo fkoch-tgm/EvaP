@@ -79,10 +79,10 @@
                 <confirmation-modal type="submit" form="evaluation-operation-form" id="confirmation-modal">
                     <span slot="title">{% translate 'Reset Evaluation' %}</span>
                     <span slot="action-text">{% translate 'Reset Evaluation' %}</span>
-                    <!-- TODO: Brainstorm better modal-message -->
                     <span slot="question">
                         {% blocktranslate trimmed %}
-                            This will delete all previously received answers.
+                            This will delete all previously received answers. Evaluation participants will have to
+                            resubmit their answers.
                         {% endblocktranslate %}
                         <span slot="show-button" class="d-none"></span>
                     </span>
