@@ -1,6 +1,7 @@
 from datetime import date, datetime, timedelta
 from unittest.mock import Mock, call, patch
 
+from django.conf import settings
 from django.contrib.auth.models import Group
 from django.core import mail
 from django.core.cache import caches
@@ -8,9 +9,9 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase, override_settings
 from django_webtest import WebTest
 from model_bakery import baker
-from django.conf import settings
 
 from evap.evaluation.models import (
+    Answer,
     Contribution,
     Course,
     CourseType,
@@ -23,7 +24,7 @@ from evap.evaluation.models import (
     RatingAnswerCounter,
     Semester,
     TextAnswer,
-    UserProfile, Answer,
+    UserProfile,
 )
 from evap.evaluation.tests.tools import (
     let_user_vote_for_evaluation,
@@ -1112,8 +1113,10 @@ class TestResetEvaluation(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        assert (set(Answer.__subclasses__()) == {TextAnswer, RatingAnswerCounter}), \
-            "Test assumes the only answers are TextAnswer and RatingAnswerCounter"
+        assert set(Answer.__subclasses__()) == {
+            TextAnswer,
+            RatingAnswerCounter,
+        }, "Test assumes the only answers are TextAnswer and RatingAnswerCounter"
 
     @classmethod
     def setUpTestData(cls):
@@ -1152,6 +1155,7 @@ class TestResetEvaluation(TestCase):
 
 class TestResetEvaluationValidSourceStates(TestCase):
     """Tests if Evaluation.reset_to_new() resets and only resets from valid source states"""
+
     invalid_source_states = [Evaluation.State.NEW, Evaluation.State.PUBLISHED]
     valid_source_states = [
         Evaluation.State.PREPARED,

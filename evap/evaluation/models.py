@@ -624,8 +624,9 @@ class Evaluation(LoggedModel):
 
     def can_reset_to_new(self):
         """Is it possible to execute .reset_to_new() for this evaluation?"""
-        return any(state_transition.name == "reset_to_new" for state_transition in
-                   self.get_available_state_transitions())  # type:ignore # get_available_<fieldname>_transitions() is available for all fsm-fields on a class
+        return any(
+            state_transition.name == "reset_to_new" for state_transition in self.get_available_state_transitions()
+        )  # type:ignore # get_available_<fieldname>_transitions() is available for all fsm-fields on a class
 
     @property
     def can_be_edited_by_manager(self):
