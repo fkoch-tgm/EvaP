@@ -76,8 +76,7 @@
 
         <div class="card card-submit-area card-submit-area-2 text-center mb-3">
             <div class="card-body">
-                <!-- TODO: only show modal if show_delete_answers_checkbox and #delete-previous-answers is set -->
-                <confirmation-modal type="submit" form="evaluation-operation-form">
+                <confirmation-modal type="submit" form="evaluation-operation-form" id="confirmation-modal">
                     <span slot="title">{% translate 'Reset Evaluation' %}</span>
                     <span slot="action-text">{% translate 'Reset Evaluation' %}</span>
                     <!-- TODO: Brainstorm better modal-message -->
@@ -85,10 +84,25 @@
                         {% blocktranslate trimmed %}
                             This will delete all previously received answers.
                         {% endblocktranslate %}
+                        <span slot="show-button" class="d-none"></span>
                     </span>
-                    <!-- TODO: when should one use type="button" vs type="submit" while using the confirmation-model dialogue? -->
-                    <button slot="show-button" type="button" class="btn btn-primary">{% translate 'Confirm' %}</button>
                 </confirmation-modal>
+                <button id="form-confirmation-btn" type="button"
+                        class="btn btn-primary">{% translate 'Confirm' %}</button>
+                <script>
+                    /** @type ConfirmationModal */
+                    const modal = document.getElementById("confirmation-modal");
+                    /** @type HTMLFormElement */
+                    const form = document.getElementById("evaluation-operation-form");
+
+                    document.getElementById("form-confirmation-btn").addEventListener("click", () => {
+                        if (document.getElementById("delete-previous-answers").checked) {
+                            modal.dialog.showModal();
+                        } else {
+                            form.requestSubmit();
+                        }
+                    });
+                </script>
                 <a href="{% url 'staff:semester_view' semester.id %}" class="btn btn-light">{% translate 'Cancel' %}</a>
             </div>
         </div>
