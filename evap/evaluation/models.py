@@ -825,7 +825,7 @@ class Evaluation(LoggedModel):
         self._participant_count = None
 
     @classmethod
-    def state_to_str(cls, state: "Evaluation.State | int") -> StrOrPromise:
+    def state_to_str(cls, state: "Evaluation.State") -> StrOrPromise:
         return cls.STATE_STR_CONVERSION[state]
 
     @property
@@ -1035,18 +1035,6 @@ class Evaluation(LoggedModel):
             "_participant_count",
         ]
 
-    @classmethod
-    def transform_log_action(cls, field_action):
-        # if field_action.label.lower() == Evaluation.state.field.verbose_name.lower():
-        #     # TODO@Felix: fails, because field_action.items[0] is a string and not a real state enum / int
-        #     #             is it necessary to event transform this string into a string representation?
-        #     return FieldAction(
-        #         # field_action.label, field_action.type, [cls.state_to_str(state) for state in field_action.items]
-        #         field_action.label, field_action.type, [state for state in field_action.items]
-        #     )
-        return field_action
-
-
 @receiver(post_transition, sender=Evaluation)
 def evaluation_state_change(instance, source, **_kwargs):
     """Evaluation.save checks whether caches must be updated based on this value"""
@@ -1056,7 +1044,9 @@ def evaluation_state_change(instance, source, **_kwargs):
 
 
 @receiver(post_transition, sender=Evaluation)
-def log_state_transition(instance, name, source, target, **_kwargs):
+def log_state_transition(instance, name, source: int, target: int, **_kwargs):
+    source = Evaluation.State(source)
+    target = Evaluation.State(target)
     logger.info(
         'Evaluation "%s" (id %d) moved from state "%s" to state "%s", caused by transition "%s".',
         instance,
