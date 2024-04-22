@@ -405,8 +405,7 @@ class Evaluation(LoggedModel):
     }
 
     state = FSMIntegerField(
-        default=State.NEW, choices=STATE_STR_CONVERSION.items(), protected=True,
-        verbose_name=_("state")
+        default=State.NEW, choices=STATE_STR_CONVERSION.items(), protected=True, verbose_name=_("state")
     )
 
     course = models.ForeignKey(Course, models.PROTECT, verbose_name=_("course"), related_name="evaluations")
@@ -462,7 +461,6 @@ class Evaluation(LoggedModel):
     )
 
     class TextAnswerReviewState(Enum):
-        # TODO: replace with @enum_for_django_template decorator?
         do_not_call_in_templates = True  # pylint: disable=invalid-name
         NO_TEXTANSWERS = auto()
         NO_REVIEW_NEEDED = auto()
@@ -638,7 +636,7 @@ class Evaluation(LoggedModel):
         """Is it possible to execute .reset_to_new() for this evaluation?"""
         return any(
             state_transition.name == "reset_to_new" for state_transition in self.get_available_state_transitions()
-        )  # type:ignore # get_available_<fieldname>_transitions() is available for all fsm-fields on a class
+        )  # get_available_<fieldname>_transitions() is available for all fsm-fields on a class
 
     @property
     def can_be_edited_by_manager(self):
@@ -1028,6 +1026,7 @@ class Evaluation(LoggedModel):
             "_voter_count",
             "_participant_count",
         ]
+
 
 @receiver(post_transition, sender=Evaluation)
 def evaluation_state_change(instance, source, **_kwargs):

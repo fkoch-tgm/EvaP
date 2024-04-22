@@ -1,7 +1,6 @@
 from datetime import date, datetime, timedelta
 from unittest.mock import Mock, call, patch
 
-from django.conf import settings
 from django.contrib.auth.models import Group
 from django.core import mail
 from django.core.cache import caches
@@ -539,7 +538,7 @@ class TestEvaluations(WebTest):
             evaluation.TextAnswerReviewState.REVIEWED,
         )
 
-    def test_STATE_STR_CONVERSION_contains_all_states(self):
+    def test_state_str_conversion_contains_all_states(self):
         for state in Evaluation.State:
             self.assertIn(state, Evaluation.STATE_STR_CONVERSION)
 
