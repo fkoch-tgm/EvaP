@@ -32,7 +32,7 @@ from django.utils.translation import gettext_noop
 from django_fsm import FSMIntegerField, transition
 from django_fsm.signals import post_transition
 
-from evap.evaluation.models_logging import FieldAction, LoggedModel
+from evap.evaluation.models_logging import LoggedModel
 from evap.evaluation.tools import (
     StrOrPromise,
     clean_email,
@@ -404,16 +404,10 @@ class Evaluation(LoggedModel):
         State.PUBLISHED: _("published"),
     }
 
-    # TODO@Felix: test that choices contains all States
     state = FSMIntegerField(
         default=State.NEW, choices=STATE_STR_CONVERSION.items(), protected=True,
         verbose_name=_("state")
     )
-
-    # state = FSMIntegerField(
-    #     default=State.NEW, choices=[(s, "STATE_STR_CONVERSION[s]") for s in State], protected=True,
-    #     verbose_name=_("state")
-    # )
 
     course = models.ForeignKey(Course, models.PROTECT, verbose_name=_("course"), related_name="evaluations")
 
@@ -830,7 +824,7 @@ class Evaluation(LoggedModel):
 
     @property
     def state_str(self):
-        return self.state_to_str(self.state)
+        return Evaluation.state_to_str(Evaluation.State(self.state))
 
     @cached_property
     def general_contribution(self):

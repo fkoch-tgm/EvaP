@@ -539,6 +539,10 @@ class TestEvaluations(WebTest):
             evaluation.TextAnswerReviewState.REVIEWED,
         )
 
+    def test_STATE_STR_CONVERSION_contains_all_states(self):
+        for state in Evaluation.State:
+            self.assertIn(state, Evaluation.STATE_STR_CONVERSION)
+
 
 class TestCourse(TestCase):
     def test_can_be_deleted_by_manager(self):
