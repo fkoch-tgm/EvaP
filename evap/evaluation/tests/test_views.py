@@ -292,8 +292,6 @@ class ResetToNewFormTest(WebTestStaffMode):
 
         confirmation_form.submit()
 
-        # TODO@Felix: (needs selenium webtests) test if confirmation popup is not shown
-
         evaluation = Evaluation.objects.get(pk=self.evaluation.pk)  # re-get evaluation
         self.assertEqual(
             evaluation.voters.count(),
@@ -310,8 +308,6 @@ class ResetToNewFormTest(WebTestStaffMode):
 
     def test_delete_previous_answers(self):
         self._open_confirmation_form().submit()
-
-        # TODO@Felix: (needs selenium webtests) test if confirmation popup is shown
 
         evaluation = Evaluation.objects.get(pk=self.evaluation.pk)  # re-get evaluation
         self.assertEqual(
